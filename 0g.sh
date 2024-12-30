@@ -9,7 +9,7 @@ fi
 
 # 检查并安装 Node.js 和 npm
 function install_nodejs_and_npm() {
-    if command -v node > /dev/null 2>&1; then
+    if command -v node >/dev/null 2>&1; then
         echo "Node.js 已安装"
     else
         echo "Node.js 未安装，正在安装..."
@@ -17,7 +17,7 @@ function install_nodejs_and_npm() {
         sudo apt-get install -y nodejs
     fi
 
-    if command -v npm > /dev/null 2>&1; then
+    if command -v npm >/dev/null 2>&1; then
         echo "npm 已安装"
     else
         echo "npm 未安装，正在安装..."
@@ -27,7 +27,7 @@ function install_nodejs_and_npm() {
 
 # 检查并安装 PM2
 function install_pm2() {
-    if command -v pm2 > /dev/null 2>&1; then
+    if command -v pm2 >/dev/null 2>&1; then
         echo "PM2 已安装"
     else
         echo "PM2 未安装，正在安装..."
@@ -37,7 +37,7 @@ function install_pm2() {
 
 # 检查Go环境
 function check_go_installation() {
-    if command -v go > /dev/null 2>&1; then
+    if command -v go >/dev/null 2>&1; then
         echo "Go 环境已安装"
         return 0
     else
@@ -53,7 +53,7 @@ function install_node() {
     install_pm2
 
     # 检查curl是否安装，如果没有则安装
-    if ! command -v curl > /dev/null; then
+    if ! command -v curl >/dev/null; then
         sudo apt update && sudo apt install curl git -y
     fi
 
@@ -65,13 +65,13 @@ function install_node() {
     if ! check_go_installation; then
         sudo rm -rf /usr/local/go
         curl -L https://go.dev/dl/go1.22.0.linux-amd64.tar.gz | sudo tar -xzf - -C /usr/local
-        echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >> $HOME/.bash_profile
+        echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >>$HOME/.bash_profile
         source $HOME/.bash_profile
         go version
     fi
 
     # 安装所有二进制文件
-    git clone -b v0.3.2 https://github.com/0glabs/0g-chain.git
+    git clone -b v0.4.0 https://github.com/0glabs/0g-chain.git
     cd 0g-chain
     make install
     source ~/.profile
@@ -98,7 +98,6 @@ function install_node() {
     sed -i "s/seeds = \"\"/seeds = \"$SEEDS\"/" $HOME/.0gchain/config/config.toml
     sed -i -e 's/max_num_inbound_peers = 40/max_num_inbound_peers = 100/' -e 's/max_num_outbound_peers = 10/max_num_outbound_peers = 100/' $HOME/.0gchain/config/config.toml
     wget -O $HOME/.0gchain/config/addrbook.json https://server-5.itrocket.net/testnet/og/addrbook.json
-
 
     # 配置裁剪
     sed -i -e "s/^pruning *=.*/pruning = \"custom\"/" $HOME/.0gchain/config/app.toml
@@ -141,15 +140,15 @@ function uninstall_node() {
     read -r -p "请确认: " response
 
     case "$response" in
-        [yY][eE][sS]|[yY])
-            echo "开始卸载节点程序..."
-            pm2 stop 0gchaind && pm2 delete 0gchaind
-            rm -rf $HOME/.0gchain $HOME/0gchain $(which 0gchaind) && rm -rf 0g-chain
-            echo "节点程序卸载完成。"
-            ;;
-        *)
-            echo "取消卸载操作。"
-            ;;
+    [yY][eE][sS] | [yY])
+        echo "开始卸载节点程序..."
+        pm2 stop 0gchaind && pm2 delete 0gchaind
+        rm -rf $HOME/.0gchain $HOME/0gchain $(which 0gchaind) && rm -rf 0g-chain
+        echo "节点程序卸载完成。"
+        ;;
+    *)
+        echo "取消卸载操作。"
+        ;;
     esac
 }
 
@@ -184,22 +183,21 @@ function add_validator() {
     read -p "请输入您想设置的验证者的名字: " validator_name
     read -p "请输入您的验证者详情（例如'吊毛资本'）: " details
 
-
     0gchaind tx staking create-validator \
-    --amount=1000000ua0gi \
-    --pubkey=$(0gchaind tendermint show-validator) \
-    --moniker=$validator_name \
-    --chain-id=zgtendermint_16600-2 \
-    --commission-rate=0.05 \
-    --commission-max-rate=0.10 \
-    --commission-max-change-rate=0.01 \
-    --min-self-delegation=1 \
-    --from=$wallet_name \
-    --identity="" \
-    --website="" \
-    --details="$details" \
-    --gas=auto \
-    --gas-adjustment=1.4
+        --amount=1000000ua0gi \
+        --pubkey=$(0gchaind tendermint show-validator) \
+        --moniker=$validator_name \
+        --chain-id=zgtendermint_16600-2 \
+        --commission-rate=0.05 \
+        --commission-max-rate=0.10 \
+        --commission-max-change-rate=0.01 \
+        --min-self-delegation=1 \
+        --from=$wallet_name \
+        --identity="" \
+        --website="" \
+        --details="$details" \
+        --gas=auto \
+        --gas-adjustment=1.4
 }
 
 function install_storage_node() {
@@ -207,17 +205,15 @@ function install_storage_node() {
     sudo apt-get update
     sudo apt-get install clang cmake build-essential git screen cargo -y
 
-
     # 安装 Go
     sudo rm -rf /usr/local/go
     curl -L https://go.dev/dl/go1.22.0.linux-amd64.tar.gz | sudo tar -xzf - -C /usr/local
-    echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >> $HOME/.bash_profile
+    echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >>$HOME/.bash_profile
     export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
     source $HOME/.bash_profile
 
-
     # 克隆仓库
-    git clone -b v0.4.2 https://github.com/0glabs/0g-storage-node.git
+    git clone -b v0.8.3 https://github.com/0glabs/0g-storage-node.git
 
     # 进入对应目录构建
     cd 0g-storage-node
@@ -242,17 +238,14 @@ function install_storage_node() {
     cd ~/0g-storage-node/run
     screen -dmS zgs_node_session $HOME/0g-storage-node/target/release/zgs_node --config $HOME/0g-storage-node/run/config-testnet-turbo.toml
 
-
     echo '====================== 安装完成，使用 screen -ls 命令查询即可 ==========================='
 
 }
-
 
 function install_storage_kv() {
 
     # 克隆仓库
     git clone https://github.com/0glabs/0g-storage-kv.git
-
 
     #进入对应目录构建
     cd 0g-storage-kv
@@ -267,8 +260,7 @@ function install_storage_kv() {
     echo "请输入RPC节点信息: "
     read blockchain_rpc_endpoint
 
-
-cat > config.toml <<EOF
+    cat >config.toml <<EOF
 stream_ids = ["000000000000000000000000000000000000000000000000000000000000f2bd", "000000000000000000000000000000000000000000000000000000000000f009", "00000000000000000000000000"]
 
 db_dir = "db"
@@ -295,7 +287,7 @@ EOF
 function delegate_self_validator() {
     read -p "请输入质押代币数量(单位为ua0gai,比如你有1000000个ua0gai，留点水给自己，输入900000回车就行): " math
     read -p "请输入钱包名称: " wallet_name
-    0gchaind tx staking delegate $(0gchaind keys show $wallet_name --bech val -a) ${math}ua0gi --from $wallet_name   --gas=auto --gas-adjustment=1.4 -y
+    0gchaind tx staking delegate $(0gchaind keys show $wallet_name --bech val -a) ${math}ua0gi --from $wallet_name --gas=auto --gas-adjustment=1.4 -y
 
 }
 
@@ -326,42 +318,43 @@ function change_storage_log_level() {
     echo "DEBUG 等级日志文件最大，ERROR 等级日志文件最小"
     read -p "请选择日志等级(1-4): " level
     case "$level" in
-        1)
-            echo "debug,hyper=info,h2=info" > $HOME/0g-storage-node/run/log_config ;;
-        2)
-            echo "info,hyper=info,h2=info" > $HOME/0g-storage-node/run/log_config ;;
-        3)
-            echo "warn,hyper=info,h2=info" > $HOME/0g-storage-node/run/log_config ;;
-        4)
-            echo "error,hyper=info,h2=info" > $HOME/0g-storage-node/run/log_config ;;
+    1)
+        echo "debug,hyper=info,h2=info" >$HOME/0g-storage-node/run/log_config
+        ;;
+    2)
+        echo "info,hyper=info,h2=info" >$HOME/0g-storage-node/run/log_config
+        ;;
+    3)
+        echo "warn,hyper=info,h2=info" >$HOME/0g-storage-node/run/log_config
+        ;;
+    4)
+        echo "error,hyper=info,h2=info" >$HOME/0g-storage-node/run/log_config
+        ;;
     esac
     echo "修改完成，请重新启动存储节点"
 }
 
-
 # 统计日志文件大小
-function storage_logs_disk_usage(){
+function storage_logs_disk_usage() {
     du -sh ~/0g-storage-node/run/log/
     du -sh ~/0g-storage-node/run/log/*
 }
 
-
 # 删除存储节点日志
-function delete_storage_logs(){
+function delete_storage_logs() {
     echo "确定删除存储节点日志？[Y/N]"
     read -r -p "请确认: " response
-        case "$response" in
-        [yY][eE][sS]|[yY])
-            rm -r ~/0g-storage-node/run/log/*
-            echo "删除完成，请重启存储节点"
-            ;;
-        *)
-            echo "取消操作"
-            ;;
+    case "$response" in
+    [yY][eE][sS] | [yY])
+        rm -r ~/0g-storage-node/run/log/*
+        echo "删除完成，请重启存储节点"
+        ;;
+    *)
+        echo "取消操作"
+        ;;
     esac
 
 }
-
 
 # 转换 ETH 地址
 function transfer_EIP() {
@@ -369,7 +362,6 @@ function transfer_EIP() {
     echo "0x$(0gchaind debug addr $(0gchaind keys show $wallet_name -a) | grep hex | awk '{print $3}')"
 
 }
-
 
 # 导出验证者key
 function export_priv_validator_key() {
@@ -383,20 +375,20 @@ function uninstall_storage_node() {
     read -r -p "请确认: " response
 
     case "$response" in
-        [yY][eE][sS]|[yY])
-            echo "开始卸载节点程序..."
-            rm -rf $HOME/0g-storage-node
-            echo "节点程序卸载完成。"
-            ;;
-        *)
-            echo "取消卸载操作。"
-            ;;
+    [yY][eE][sS] | [yY])
+        echo "开始卸载节点程序..."
+        rm -rf $HOME/0g-storage-node
+        echo "节点程序卸载完成。"
+        ;;
+    *)
+        echo "取消卸载操作。"
+        ;;
     esac
 }
 
 function update_script() {
-    SCRIPT_PATH="./0g.sh"  # 定义脚本路径
-    SCRIPT_URL="https://raw.githubusercontent.com/a3165458/0g.ai/main/0g.sh"
+    SCRIPT_PATH="./0g.sh" # 定义脚本路径
+    SCRIPT_URL="https://raw.githubusercontent.com/zefzhou/0g.ai/main/0g.sh"
 
     # 备份原始脚本
     cp $SCRIPT_PATH "${SCRIPT_PATH}.bak"
@@ -416,11 +408,9 @@ function update_script() {
 function main_menu() {
     while true; do
         clear
-        echo "脚本以及教程由推特用户大赌哥 @y95277777 编写，群友@rainy242869 维护更新,免费开源，请勿相信收费"
+        echo "fork from https://github.com/a3165458/0g.ai"
         echo "=======================0GAI节点安装================================"
         echo "=======================验证节点功能================================"
-        echo "节点社区 Telegram 群组:https://t.me/niuwuriji"
-        echo "节点社区 Discord 社群:https://discord.gg/GbMV5EcNWF"
         echo "退出脚本，请按键盘ctrl c退出即可"
         echo "请选择要执行的操作:"
         echo "1. 安装节点"
@@ -463,7 +453,7 @@ function main_menu() {
         11) transfer_EIP ;;
         12) install_storage_node ;;
         13) check_storage_logs ;;
-        14) check_storage_error;;
+        14) check_storage_error ;;
         15) restart_storage ;;
         16) uninstall_storage_node ;;
         17) change_storage_log_level ;;
