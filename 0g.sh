@@ -203,7 +203,7 @@ function add_validator() {
 function install_storage_node() {
 
     sudo apt-get update
-    sudo apt-get install clang cmake build-essential git screen cargo -y
+    sudo apt-get install clang cmake build-essential git pkg-config libssl-dev screen cargo -y
 
     # 安装 Go
     sudo rm -rf /usr/local/go
