@@ -10,7 +10,7 @@ echo "Removing existing 0g-storage-node directory..."
 sudo systemctl stop zgs && rm -r $HOME/0g-storage-node
 
 echo "Cloning the repository..."
-git clone -b v0.8.2 https://github.com/0glabs/0g-storage-node.git
+git clone -b v0.8.3 https://github.com/0glabs/0g-storage-node.git
 cd $HOME/0g-storage-node
 
 echo "Stashing any local changes..."
@@ -20,7 +20,7 @@ echo "Fetching all tags..."
 git fetch --all --tags
 
 echo "Checking out specific commit..."
-git checkout 4e5b14c
+git checkout 40d4355
 
 echo "Updating submodules..."
 git submodule update --init
@@ -54,7 +54,7 @@ EOF
 
 read -p "请输入你想导入的EVM钱包私钥，不要有0x: " miner_key
 sed -i '
-    s|# miner_key = ""|miner_key = "'$miner_key'"|
+    s|# miner_key = "your key"|miner_key = "'$miner_key'"|
     ' $HOME/0g-storage-node/run/config.toml
 
 echo "Reloading systemd daemon, enabling and starting the service..."
